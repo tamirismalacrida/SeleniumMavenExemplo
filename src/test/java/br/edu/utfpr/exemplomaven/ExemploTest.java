@@ -32,7 +32,8 @@ public class ExemploTest {
      *
      * Versão utilizada do chromedriver: 2.35.528139
      */
-    private static String CHROMEDRIVER_LOCATION = "/home/utfpr/install/selenium/chromedriver";
+    //private static String CHROMEDRIVER_LOCATION = "/home/utfpr/install/selenium/chromedriver";
+     private static String CHROMEDRIVER_LOCATION = "C:\\Selenium\\chromedriver.exe";
     
     private static int scId = 0;
 
@@ -47,12 +48,12 @@ public class ExemploTest {
     public void before() {
         ChromeOptions chromeOptions = new ChromeOptions();
         //Opcao headless para MacOS e Linux
-        chromeOptions.addArguments("headless");
+        //chromeOptions.addArguments("headless");
         chromeOptions.addArguments("window-size=1200x600");
         chromeOptions.addArguments("start-maximized");
         
         driver = new ChromeDriver(chromeOptions);
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
     }
     
     @After
@@ -61,28 +62,51 @@ public class ExemploTest {
     }
     
     @Test
-    public void testGoogleSearch() {
-        driver.get("https://www.google.com.br/");
-        WebElement searchInput = driver.findElement(By.name("q"));
-        searchInput.sendKeys("teste de software");
+    public void testMainPage()
+    {
+        driver.get("https://ration.io/signup");
         
-        takeScreenShot();
-        
-        searchInput.submit();
-        
-        WebDriverWait wait = new WebDriverWait(driver, 10);
-        wait.until( (ExpectedCondition<Boolean>) (WebDriver d) -> d.getTitle().toLowerCase().startsWith("teste") );
-        
-        takeScreenShot();
-        
-        assertTrue(driver.getTitle().startsWith("teste de software"));
+        WebElement terms = driver.findElement(By.xpath("//*[@id=\"signup\"]/div/div/p[2]/a")); 
+        terms.click();
+       
+        WebElement retorno = driver.findElement(By.xpath("//*[@id=\"login\"]/div/h1") ); 
+        assertTrue(retorno.getText().contains("Sign in to your account"));               
     }
     
-    private void takeScreenShot() {
-        File sourceFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        try {
-            scId++;
-            FileUtils.copyFile(sourceFile, new File("./res/" + scId + ".png"));
-        } catch(IOException e) {}
+    @Test 
+    public void testLogin()
+    {
+        driver.get("https://ration.io/login");
+        
+        WebElement email = driver.findElement(By.xpath("//*[@id=\"login\"]/div/div/form/div[1]/input"));
+        email.sendKeys("tamirismalacrida@gmail.com");
+        
+        WebElement password = driver.findElement(By.xpath("//*[@id=\"login\"]/div/div/form/div[2]/input"));
+        password.sendKeys("120491");
+        
+        WebElement submit = driver.findElement(By.xpath("//*[@id=\"login\"]/div/div/form/div[4]/button") );
+        submit.click();
+                
+        WebElement logado = driver.findElement(By.xpath("//*[@id=\"friends\"]/div/div[1]/h2") );
+        assertTrue(logado.getText().contains("View and add people to share stuff with."));               
     }
+    
+     @Test
+    public void testRecoveryPassword(){
+        
+        driver.get("https://ration.io/login");
+
+        WebElement esqSenha = driver.findElement(By.xpath("//*[@id=\"login\"]/div/div/p/a"));
+        esqSenha.click();
+        
+        WebElement email = driver.findElement(By.name("email-address"));
+        email.sendKeys("tamirismalacrida@gmail.com");
+        
+        WebElement btn = driver.findElement(By.xpath("//*[@id=\"forgot-password\"]/div/div/form/div[2]/button"));
+        btn.click();
+                
+        WebElement retorno = driver.findElement(By.xpath("//*[@id=\"forgot-password\"]/div/h1") );
+        assertTrue(retorno.getText().contains("Recover password"));
+        
+    }   
 }
